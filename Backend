@@ -1,0 +1,39 @@
+const express = require('express');
+const cors = require('cors');
+const multer = require('multer');
+const app = express();
+const port = process.env.PORT || 5000;
+
+app.use(cors());
+app.use(express.json());
+
+const upload = multer({ dest: 'uploads/' });
+
+let reports = [];
+
+app.post('/api/report', upload.single('photo'), (req, res) => {
+  const { name, category, message } = req.body;
+  const photo = req.file ? req.file.filename : null;
+
+  if (!message) return res.status(400).send('Bericht is verplicht');
+
+  const report = {
+    id: reports.length + 1,
+    name: name || 'Anoniem',
+    category,
+    message,
+    photo,
+    status: 'nieuw',
+    createdAt: new Date(),
+  };
+  reports.push(report);
+  res.status(200).send('Melding ontvangen');
+});
+
+app.get('/api/reports', (req, res) => {
+  res.json(reports);
+});
+
+app.listen(port, () => {
+  console.log(`Server draait op poort ${port}`);
+});
