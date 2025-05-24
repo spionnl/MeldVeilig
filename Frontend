@@ -1,0 +1,77 @@
+import React, { useState } from 'react';
+
+function App() {
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState('buurt');
+  const [message, setMessage] = useState('');
+  const [photo, setPhoto] = useState(null);
+  const [status, setStatus] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!message) {
+      setStatus('Vul een bericht in!');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('category', category);
+    formData.append('message', message);
+    if (photo) formData.append('photo', photo);
+
+    try {
+      const res = await fetch('http://localhost:5000/api/report', {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        setStatus('Melding succesvol verzonden!');
+        setName('');
+        setCategory('buurt');
+        setMessage('');
+        setPhoto(null);
+      } else {
+        setStatus('Er ging iets mis bij het verzenden.');
+      }
+    } catch {
+      setStatus('Er ging iets mis bij het verzenden.');
+    }
+  };
+
+  return (
+    <div>
+      <h1>Melding maken</h1>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Naam (optioneel):
+          <input value={name} onChange={e => setName(e.target.value)} />
+        </label>
+        <br />
+        <label>
+          Categorie:
+          <select value={category} onChange={e => setCategory(e.target.value)}>
+            <option value="buurt">Buurt</option>
+            <option value="werk">Werk</option>
+            <option value="thuis">Thuis</option>
+            <option value="anders">Anders</option>
+          </select>
+        </label>
+        <br />
+        <label>
+          Bericht:
+          <textarea value={message} onChange={e => setMessage(e.target.value)} required />
+        </label>
+        <br />
+        <label>
+          Foto uploaden (optioneel):
+          <input type="file" onChange={e => setPhoto(e.target.files[0])} />
+        </label>
+        <br />
+        <button type="submit">Verzenden</button>
+      </form>
+      <p>{status}</p>
+    </div>
+  );
+}
+
+export default App;
